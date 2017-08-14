@@ -1,0 +1,129 @@
+---
+layout: post
+title: Laravel AJAX Tutorial Using HTML5's FormData
+---
+
+<p>For this tutorial, I will show you guys how I managed to create an image uploader for your profile image. This is very similar to how Facebook's/Twitter's functionality.</p>
+<p>First of all, lets create the routes, for this we will need to create a get and post route...</p>
+<pre><code>Route::get('{username}',  'UsernameController@show');</code></pre>
+<p>oRoute::post('{username}/upload', 'UploadController@profileImage');</p>
+<p>Remember that you can name the controllers and methods anything you like, as long as you keep everything consistant. Now we need to create the controllers and methods which are as follows...</p>
+<pre><code>// User Controller, index mehod</code></pre>
+<p>opublic function show($username)
+o{
+o//
+o$user = User::where('username', $username)-&gt;first();
+$userData = User::find($user-&gt;id)-&gt;UserDetail;</p>
+<p>oreturn View::make('user', array(
+'userData'=&gt; $userData
+))-&gt;with('user', $user);
+o}</p>
+<!-- more -->
+<p>We are trying to get the user's information where it matches in the URI, as you can see, I have a one to one relationship with a user and a user's information (called UserDetail). I believe the user array could be placed along with the userData array, but I decided to place this inside the with method.</p>
+<p>Now we need to handle the image data which will upload the image in the background without anying knowing it's happening...</p>
+<pre><code>// UploadController, profileImage method</code></pre>
+<p>opublic function profileImage($username){
+$user = User::where('username', $username)-&gt;first();
+$temp = $_FILES['upload']['tmp_name'];
+$image = $_FILES['upload']['name'];
+$ext = pathinfo($image, PATHINFO_EXTENSION);</p>
+<pre><code>    $newFilename = uniqid($user-&gt;id);
+
+    if(!is_dir("images/$username/"))
+    {
+        mkdir("images/$username", 0777);
+    }
+
+    $img = Image::make($temp);
+
+    $img-&gt;fit(130, 130);
+
+    $src = "images/$username/$newFilename.$ext";
+
+    $img-&gt;save($src);
+
+    $query = User::find($user-&gt;id)-&gt;profileImage;
+    $query-&gt;src = $src;
+    $query-&gt;alt = $username . '\'s Profile Image';
+    $query-&gt;save();
+}</code></pre>
+<p>Firstly, we need to match the username with the username in the URI, after this, we grab the image and process it. Please note that I am using the <a href="https://github.com/Intervention/image">Intervention/Image</a> package, which you can easily grab and install to implement it across your website. We check to see if the directory exists, if it doesn't, then we create it with r/w permissions. I then use the image package to create and image which is 130px X 130px, the fit method will automatically crop the image so it doesn't look stretched and horrible. We then give it a source which tells it where to save this image which then gets saved. Afterwards, we call the database and find the user to set the image src and alt rows.</p>
+<p>Now that we have all the backend magic happening, we actually need to create a view which displays the form and automatically refreshes the image upon upload completion...</p>
+<pre><code>@extends('layout')</code></pre>
+<p>o@section('content')</p>
+<pre><code>  &lt;div class="row"&gt;</code></pre>
+<p>o  <div id="profile-wrapper">
+o  <div class="large-2 columns pull-left">
+o  <img class="profile-thumb th" src="/{{ $user->profileImage->src }}" alt="Profile Image" />
+o  </div>
+o  <h2>About</h2>
+o  @if(isset($loggedIn) &amp;&amp; $loggedIn-&gt;username ==  $user-&gt;username)
+o  <a href="#" class="upload-link">
+o  Upload a file
+o  </a>
+o  <div class="hidden-upload">
+o  {{ Form::open(array('action' =&gt; array('User::upload', $user-&gt;username), 'files' =&gt; 'true', 'id' =&gt; 'image-form')) }}
+o  {{ Form::file('upload', array('class' =&gt; 'profile-upload')) }}
+o  {{ Form::close() }}
+o  </div>
+o  @endif
+o  </div>
+o  <p>{{ $userData-&gt;about }}</p>
+o</div></p>
+<pre><code>@stop</code></pre>
+<p>We only want to show this hidden form if the user is logged in and it's the same logged in user which is seeing his/her own profile. As you can see, we are using Laravel's blade syntax which makes this page look a lot cleaner and easier to see what is going on. Right, now we need the JQuery which will send the image to the post controller we recently created...</p>
+<pre><code>&lt;script&gt;
+@if(isset($user))
+$('form').change(function(){
+    var fd = new FormData($('form')[0]); // Create an arbitrary FormData instance
+
+    $.ajax({
+        url: '/user/{{ $user-&gt;username }}/upload',
+        data: fd,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(){
+    dow.location.reload(true);
+        }
+    });
+})
+@endif</code></pre>
+<p></script></p>
+<p>I have created my own scripts.blade.php which gets placed into my layout.blade.php, you can do the same, or you can include this within the page itself. I added an if statement to avoid any errors for when a user isn't logged in. Our JQuery creates a new formData function and passes in the form we created, we then call the ajax method and pass it some parameters.</p>
+<ul>
+<li>url: sets the url to where the image needs to get passed to, this is the route we created above.</li>
+<li>data: sets the data to formData.</li>
+<li>processData and contentType are both set to false, this has to be set to avoid any future errors.</li>
+<li>type: We set this to post as it is a post method.</li>
+<li>success: On success, it will refresh the window to display the newly uploaded image.</li>
+</ul>
+<p>And there you guys have it, this is all we need to create our really awesome AJAX upload form, but you guys might be wondering, how do we hide the form? We here's the optional steps so you can create a hidden form which gets shown upon mouse hover...</p>
+<pre><code>//CSS file
+.upload-link {
+    position: absolute;    
+    top: 100px;        
+    left: 35px;</code></pre>
+<p>dex: 0;
+one;
+o}</p>
+<p>o#profile-wrapper .upload-link {
+one;
+o}</p>
+<p>o#profile-wrapper:hover .upload-link {
+odisplay: inline;
+obackground: rgba(0, 0, 0, 0.8);
+ocolor: #fff;
+opadding: 2px;
+o}</p>
+<p>o.hidden-upload {
+oposition: absolute;
+otop: 100px;
+oleft: 35px;
+oz-index: 1;
+o}</p>
+<p>o.hidden-upload .profile-upload {
+oopacity: 0;
+o}
+o
+Now, that is all there is (I promise). If you have any questions, comments or feedback, then please feel free to drop a comment down below. I always like to read what you guys have to say and love replying back to you. I hope you look forward to my next Blog post.</p>

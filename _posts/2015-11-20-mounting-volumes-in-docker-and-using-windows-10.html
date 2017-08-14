@@ -1,0 +1,27 @@
+---
+layout: post
+title: Mounting Volumes in Docker and Using Windows 10
+---
+
+<p>This is a quick post to details some issues I have found when trying to use Docker within a Mac or Windows environment.</p>
+<p>I had been following this tutorial on how to get <a href="http://www.sitepoint.com/docker-and-dockerfiles-made-easy/">Laravel up and running on Docker</a> and my first pain I came across has been shared with both Mac and Windows environments.</p>
+<p>Basically, when you go to mount a volume, by default you can only mount local directories in your User folder. To fix this, you first need to open up your VirtualBox GUI. Click on your current VM and click on &quot;Settings&quot;, then head over to &quot;Shared Folders&quot;. When you get here, you will want to click on the plus symbol to add a new folder share. For me, I wanted to mount my sites directory which could be found in my d drive...</p>
+<!-- more -->
+<p><img src="http://i64.tinypic.com/6duvxs.png" alt="Shared folders on Virtual Box" /></p>
+<p>I'm not 100% sure if &quot;Auto-mount&quot; and &quot;Make Permanent&quot; really matter, but I ticked it any way.</p>
+<p>Once done, you will need to type something similar to the following...</p>
+<pre><code>docker-machine ssh docker-vm 'sudo mount -t vboxsf d/sites/laravel //d/sites/laravel'</code></pre>
+<p>o
+(Please note that the double // is for Windows only and isn't needed in Mac, also, you should rename &quot;docker-vm&quot; to whatever your vm is called.)</p>
+<p>Now this has been done, you can mount your volume as needed.</p>
+<hr />
+<p>Next up is a Windows only issue, this one is quick and easy, but can be frustrating when you can't find the correct solution. If you are like me and run Docker using git bash, then you won't be able to mount your volume in the normal way which is usually something like this...</p>
+<pre><code>docker run -tid -p 80:80 -v /d/sites/laravel:/var/www nimmis/apache-php5</code></pre>
+<p>o
+You will revieve an error...</p>
+<p>&quot;invalid value &quot;D:\sites\laravel;C:\Program Files\Git\var\www&quot; for flag -v: bad mode specified: \Program Files\Git\var\www
+See 'C:\Program Files\Docker Toolbox\docker.exe run --help'.&quot;</p>
+<p>Instead you need to add a double forward slash at the beginning so it ends up like this...</p>
+<pre><code>docker run -tid -p 80:80 -v //d/sites/laravel:/var/www nimmis/apache-php5</code></pre>
+<hr />
+<p>I hope you enjoyed this post and if you have anything you would like to add to it, please feel free to leave a comment below.</p>

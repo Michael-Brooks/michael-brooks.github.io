@@ -1,0 +1,131 @@
+---
+layout: post
+title: Using View Composers in Laravel 5.2
+---
+
+<p>I have started using Laravel's View Composers which come in handy when you have a navigation bar that constantly needs certain data. For example, you have an ecommerce store and you need to poll how many items a user has in their basket on pretty much every page they move onto, or you need a login/register button when a user isn't logged in and then a profile options button when they are.</p>
+<p>You could be really lazy and add the same code/query into every single controller, which yes, that will work, but then that's not DRY (Don't Repeat Yourself). To fix this, we can complete a couple of simple steps and have one bit of code which will constantly be in use every time a certian partial is called.</p>
+<p>If you currently have a layout/template view which has the navigation menu already written in, then you will need to move this out into a partial. Within your &quot;resources &gt; views&quot; directory, you will need to create a new directory called &quot;partials&quot;. Once done, you will need to create a &quot;nav.blade.php&quot; file and paste in your navigation code. It should look something like this...</p>
+<pre><code> &lt;nav class="navbar navbar-default"&gt;
+o&lt;div class="container-fluid"&gt;
+o  d and toggle get grouped for better mobile display --&gt;
+o  avbar-header"&gt;
+o&lt;button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false"&gt;
+o   class="sr-only"&gt;Toggle navigation&lt;/span&gt;
+o&lt;span class="icon-bar"&gt;&lt;/span&gt;
+o&lt;span class="icon-bar"&gt;&lt;/span&gt;
+o&lt;span class="icon-bar"&gt;&lt;/span&gt;
+o&lt;/button&gt;
+o&lt;a class="navbar-brand" href="#"&gt;Brand&lt;/a&gt;
+o  &lt;/div&gt;
+
+o  &lt;!-- Collect the nav links, forms, and other content for toggling --&gt;
+o  &lt;div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"&gt;
+o&lt;ul class="nav navbar-nav"&gt;
+o  &lt;li class="active"&gt;&lt;a href="#"&gt;Link &lt;span class="sr-only"&gt;(current)&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;Link&lt;/a&gt;&lt;/li&gt;
+o  &lt;li class="dropdown"&gt;
+o&lt;a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"&gt;Dropdown &lt;span class="caret"&gt;&lt;/span&gt;&lt;/a&gt;
+o&lt;ul class="dropdown-menu"&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;Action&lt;/a&gt;&lt;/li&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;Another action&lt;/a&gt;&lt;/li&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+o  &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+o  &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+o  &lt;li&gt;&lt;a href="#"&gt;One more separated link&lt;/a&gt;&lt;/li&gt;
+o&lt;/ul&gt;
+o  &lt;/li&gt;
+o&lt;/ul&gt;
+o&lt;form class="navbar-form navbar-left" role="search"&gt;
+o  &lt;div class="form-group"&gt;
+o&lt;input type="text" class="form-control" placeholder="Search"&gt;
+o  &lt;/div&gt;
+o  &lt;button type="submit" class="btn btn-default"&gt;Submit&lt;/button&gt;
+o&lt;/form&gt;
+o&lt;ul class="nav navbar-nav navbar-right"&gt;
+        &lt;li&gt;&lt;button type="button" class="btn btn-primary navbar-btn"&gt;Basket &lt;span class="badge"&gt;0&lt;/span&gt;&lt;/button&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+o  &lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;
+o&lt;/div&gt;&lt;!-- /.container-fluid --&gt;
+&lt;/nav&gt;</code></pre>
+<p>Next, in your layout or template blade, you can add...</p>
+<pre><code>require('partials.nav')</code></pre>
+<p>o
+This will include your navigation file.</p>
+<p>Now for setting up the View Composer, firstly we need to setup a ServiceProvider (for the sake of this tutorial I will show a example for counting a basket)...</p>
+<p>o&lt;?php
+o
+onamespace App\Providers;
+o
+ouse Illuminate\Support\ServiceProvider;
+o
+oclass ComposerServiceProvider extends ServiceProvider
+o{
+o/<strong>
+o <em> Register bindings in the container.
+o </em>
+o <em> @return void
+o </em>/
+opublic function boot()
+o{
+o// Using Closure based composers...
+oview()-&gt;composer(
+o'partials.nav', 'App\Http\ViewComposers\BasketComposer'
+o);
+o}
+o
+o/</strong>
+o <em> Register the service provider.
+o </em>
+o <em> @return void
+o </em>/
+opublic function register()
+o{
+o//
+o}
+o}
+o
+The service provider will run whenever you use the nav partial and in the next attribute, it will use your BasketComposer which should look something like this...</p>
+<p>o&lt;?php
+o
+onamespace App\Http\ViewComposers;
+o
+ouse Illuminate\View\View;
+ouse Illuminate\Users\Repository as UserRepository;
+ouse Cart;</p>
+<p>oclass BasketComposer
+o{
+o/<strong>
+o <em> The user repository implementation.
+o </em>
+o <em> @var UserRepository
+o </em>/
+oprotected $cart;
+o
+o/</strong>
+o <em> Create a new profile composer.
+o </em>
+o <em> @param  UserRepository  $users
+o </em> @return void
+o */
+opublic function __construct()
+o{
+o// Dependencies automatically resolved by service container...
+o$this-&gt;cart = Cart::Contents();
+o}
+o
+o/*<em>
+o </em> Bind data to the view.
+o <em>
+o </em> @param  View  $view
+o <em> @return void
+o </em>/
+opublic function compose(View $view)
+o{
+o$view-&gt;with('cart', $this-&gt;cart['result']['total_items']);
+o}
+o}</p>
+<p>Obviously, depending on your API or personal use, your code should vary here, but you should get an idea of how this is working. Everytime we need the nav partial, the view will be rendered with our given items. This can also be passed to many views at once which makes it work really well. I also believe you can pass many different constant data sets into a single view, so you could in theory also add a user constant for log in and edit profile data.</p>
+<p>For more information, feel free to visit Laravel's documentation on <a href="https://laravel.com/docs/5.2/views#view-composers">View Composers</a> and this nice <a href="https://laracasts.com/series/laravel-5-fundamentals/episodes/25">Laracasts video</a> which helped me figure out how to use it correctly.</p>
+<p>If you have a unique use case, please let me know and we can discuss as a community just how useful these View Composers are.</p>

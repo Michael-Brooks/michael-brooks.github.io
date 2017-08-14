@@ -1,0 +1,14 @@
+---
+layout: post
+title: Most helpful GIT command...
+---
+
+<p>This little command is a lifesaver and will save you so much time when switching and merging previous branches in your GIT workflow.</p>
+<p><code>git checkout -</code></p>
+<p><code>git merge -</code></p>
+<p>See the little minus symbol at the end? That basically tells GIT you want to checkout the previous branch, or merge the previous branch. This will also work with rebasing and any other command which uses branches.</p>
+<p>Say you were in master branch and wanted to switch to that new PR request your colleague has submitted, you would do something like this...</p>
+<p><code>git checkout new-feature</code></p>
+<p>You look at the code and test and all looks good, so you want to switch back to master and then merge in the new feature, this will be super easy and you won't need to remember the branch names...</p>
+<p>Switch back to master branch <code>git checkout -</code> then merge that new feature in <code>git merge -</code>. How much easier was that? You guys can thank me later when you have finished merging in all those PRs. ;)</p>
+<p>Have any other commands you find helpful? Let us know in the comments below.</p>

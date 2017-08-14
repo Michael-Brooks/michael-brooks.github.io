@@ -1,0 +1,46 @@
+---
+layout: post
+title: Using Vagrant and Homestead In as Little Steps as Possible (Per Project Install)
+---
+
+<p>I want to show you guys just how quick and easy it easy to get a Laravel project up and running alongside Vagrant/Homestead.</p>
+<p>1 . Head over to your chosen directory and run something like...</p>
+<pre><code>composer create-project laravel/laravel PROJECTNAME</code></pre>
+<p>or if you have the Laravel installer...</p>
+<pre><code>laravel new PROJECTNAME</code></pre>
+<p>This will create a Laravel project directory with everything installed inside the given PROJECTNAME folder.</p>
+<p>2 . When you cd into your PROJECTNAME directory, you can run the following...</p>
+<pre><code>composer require laravel/homestead --dev</code></pre>
+<p>This will add Homestead into your Composers require attribute under the dev tag, which means it will only be used for development purposes.</p>
+<p>3 . You then need to run...</p>
+<pre><code>vendor/bin/homestead make</code></pre>
+<p>This will create the VagrantFile and Homestead.yaml file to be used for Vagrant.</p>
+<p>The Homestead.yaml file is used to configure any settings to be used in your virtual machine. If you need more advanced settings, then check out <a href="http://laravel.com/docs/5.1/homestead">the Homestead docs</a>, which shows how to add Blackfire and Crons etc.</p>
+<p>4 . Run</p>
+<pre><code>vagrant up</code></pre>
+<p>This will get your virtual machine up and running, once running, you can visit the site through 192.168.10.10, it should now be ready for dev work.</p>
+<!-- more -->
+<hr />
+<p>If you're like me and don't like working on the IP address, you have a couple of options. Firstly, you can add a hostname manually in your computers hosts file. Something like...</p>
+<pre><code>192.168.10.10 homestead.app    </code></pre>
+<p>You can change &quot;homestead.app&quot; to whatever host name you prefer. The better and more elegant way is to add a Vagrant plugin called &quot;Vagrant Hosts Updater&quot;...</p>
+<pre><code>vagrant plugin install vagrant-hostsupdater    </code></pre>
+<p>This will automatically edit your hosts file using the settings inside your Homestead.yaml file. You can change the hostname by editing the following attributes; hostname, name and sites: -map to your chosen domain name e.g. example.app or example.dev etc.</p>
+<p>Mac and Linux users will also be asked for their admin passwords, whilst in Windows, you will need to run the Command Line as an administrator.</p>
+<hr />
+<p>Here are some fantastic commands you should learn as well as documentation from other resources to learn more about Vagrant and Homestead environments.</p>
+<p>up        Boots up the machine and fires provision</p>
+<p>reload       Reboots the machine</p>
+<p>provision      Runs only the provisioner(s)</p>
+<p>init       Initializes a new Vagrantfile based on specified box url</p>
+<p>halt         Turns off the machine</p>
+<p>destroy       Destroys the virtual machine</p>
+<p>suspend       Suspends execution</p>
+<p>resume       Resumes execution</p>
+<p>ssh       Logs in via ssh (no password is required)</p>
+<p>status       Shows info about the current Vagrant environment</p>
+<p>global-status       Shows info about all Vagrant's environments</p>
+<hr />
+<p><a href="https://laravel.com/docs/5.2/homestead">Homestead Documentation</a></p>
+<p><a href="https://www.vagrantup.com/docs/getting-started/">Vagrant Documentation</a></p>
+<p><a href="https://leanpub.com/vagrantcookbook?utm_campaign=vagrantcookbook&amp;utm_medium=embed&amp;utm_source=www.erikaheidi.com">Awesome book about Vagrant written by Erika Heidi</a></p>

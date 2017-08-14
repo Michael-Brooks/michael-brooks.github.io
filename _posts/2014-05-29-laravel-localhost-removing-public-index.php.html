@@ -1,0 +1,10 @@
+---
+layout: post
+title: Laravel Localhost removing /public/index.php
+---
+
+<p>I have been in the Laravel chats for quite a while now and one question which I see requarly is how to remove the public/index.php directory in Localhost. The easiest way to do this (and the way I always use) is to open up your Command prompt or Terminal and cd into the main directory of your project then run &quot;php artisan serve&quot;. That's it. You're done. Don't believe me? Check out <code>http://localhost:8000</code> and admire your Laravel work.</p>
+<p>Another way, but a bit more complicated would be to set up a virtual host (vhost) and point it to the public folder inside your projects main directory. Have a <a href="https://google.com">Google</a> around if this is what you prefer and you will find so many tutorials showing you just how to do this.</p>
+<p>Something which is a lot newer is <a href="https://vagrantup.com">Vagrant</a>, now this will set up a Virtual Machine which you can SSH into and run a local environment for your PHP. Check it out and find some tutorials on installing a LAMP envrionment inside your <a href="https://vagrantup.com">Vagrant</a> project.</p>
+<p>Laravel's version 4.2 will be coming packaged with something called <a href="https://laravel.com/docs/homestead">Homestead</a> which will have a Vagrant configuration. This will allow you to go straight into Laravel and run a Vagrant box straight away with little to no configuraion what so ever.</p>
+<p>So, try each of these examples out and find out which one is easiest for you. If you have another way then please let us know in the comments and share your experiences with setting up a Laravel project.</p>

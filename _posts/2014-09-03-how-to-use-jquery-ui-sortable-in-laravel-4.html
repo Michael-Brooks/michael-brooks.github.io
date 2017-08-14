@@ -1,0 +1,78 @@
+---
+layout: post
+title: How To Use Jquery UI Sortable in Laravel 4
+---
+
+<p>I needed a way to change the sort order of my data inside of an admin interface which I have created. After a little looking around, I found many tutorials which would show how to get this done with JQuery, but wouldn't show the best way to handle this data (and in my case using Laravel to handle this data). I dug around for quite a bit, but I ended up finding this lovely little tutorial by <a href="http://tutsglobal.com/profile/1/dragonfire1119">dragonfire1119</a> which was called <a href="http://tutsglobal.com/discussion/11/how-to-use-jquery-ui-sortable-in-laravel-4">How To Use Jquery UI Sortable In Laravel 4</a>.</p>
+<p>(Okay, so I might have copied his title exactly, but it is a pretty good title and he does get all the credit).</p>
+<!-- more -->
+<p>The only trouble is, when you follow this tutorial, it could be tidied up a little, here is my version...</p>
+<pre><code>// Place this inside your View
+&lt;ul class='sortable' style="list-style:none;"&gt;
+   @foreach($categories as $category)
+       &lt;li class="" id="{{ $category-&gt;id }}"&gt;sort me&lt;/li&gt;
+   @endforeach
+&lt;/ul&gt;</code></pre>
+<p>Here is the JQuery...</p>
+<pre><code>$(document).ready(function () {
+    $('.sortable').sortable({
+        cursor: 'move',
+        axis: 'y',
+        update: function (event, ui) {
+            var order = $(this).sortable('toArray');
+            $.post('{{ URL::route('Sliders::sort') }}', { order: order });
+        }
+    });
+});</code></pre>
+<p>And then your Controller will look like this...</p>
+<pre><code>public function sort()
+{
+    $input = \Input::get('order');
+    $i = 1;
+
+    foreach($input as $value) {
+        $banner = Banner::find($value);
+
+        $banner-&gt;sort_by = $i;
+
+        $banner-&gt;save();
+
+        $i++;
+    }
+}</code></pre>
+<p>The JQuery and Controller could also look like this...</p>
+<pre><code>//Jquery
+$(document).ready(function () {
+    $('.sortable').sortable({
+    cursor: 'move',
+    action (event, ui) {
+        var data = $(this).sortable('serialize');
+
+        // POST to server using $.post or $.ajax
+        $.ajax({
+            data: data,
+            type: 'POST',
+            url: '/your/url/here'
+        });
+    }
+  });
+});</code></pre>
+<p>Updated Controller...</p>
+<pre><code>//Controller
+public function sort()
+{
+    $input = \Input::get('item');
+    $i = 0;
+
+    foreach($input as $value) {
+        $banner = Banner::find($value);
+
+        $banner-&gt;sort_by = $i;
+
+        $banner-&gt;save();
+
+        $i++;
+    }
+}</code></pre>
+<p>I think that both work just as well and it is down to personal preference. If you would like to know where I got the second method from, you can take a look <a href="http://stackoverflow.com/questions/15633341/jquery-ui-sortable-then-write-order-into-a-database">here</a>.</p>
+<p>As always, if you have any comments/suggestion the please feel free to let me know in the comments.</p>
